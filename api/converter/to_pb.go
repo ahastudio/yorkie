@@ -178,7 +178,7 @@ func toJSONElementSimple(elem json.Element) *api.JSONElementSimple {
 	panic("fail to encode JSONElement to protobuf")
 }
 
-func toTextNodePos(pos *json.TextNodePos) *api.TextNodePos {
+func toTextNodePos(pos *json.RGATreeSplitNodePos) *api.TextNodePos {
 	return &api.TextNodePos{
 		CreatedAt:      toTimeTicket(pos.ID().CreatedAt()),
 		Offset:         int32(pos.ID().Offset()),

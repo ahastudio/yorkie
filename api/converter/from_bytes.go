@@ -27,7 +27,7 @@ import (
 
 func BytesToObject(snapshot []byte) (*json.Object, error) {
 	if snapshot == nil {
-		return json.NewObject(json.NewRHT(), time.InitialTicket), nil
+		return json.NewObject(json.NewRHTPriorityQueueMap(), time.InitialTicket), nil
 	}
 
 	pbElem := &api.JSONElement{}
@@ -54,7 +54,7 @@ func fromJSONElement(pbElem *api.JSONElement) json.Element {
 }
 
 func fromJSONObject(pbObj *api.JSONElement_Object) *json.Object {
-	members := json.NewRHT()
+	members := json.NewRHTPriorityQueueMap()
 	for _, pbNode := range pbObj.Nodes {
 		members.Set(pbNode.Key, fromJSONElement(pbNode.Element))
 	}
@@ -94,7 +94,7 @@ func fromJSONPrimitive(pbPrim *api.JSONElement_Primitive) *json.Primitive {
 }
 
 func fromJSONText(pbText *api.JSONElement_Text) *json.Text {
-	rgaTreeSplit := json.NewRGATreeSplit()
+	rgaTreeSplit := json.NewRGATreeSplit(json.InitialTextNode())
 
 	current := rgaTreeSplit.InitialHead()
 	for _, pbNode := range pbText.Nodes {
@@ -102,7 +102,7 @@ func fromJSONText(pbText *api.JSONElement_Text) *json.Text {
 		current = rgaTreeSplit.InsertAfter(current, textNode)
 		insPrevID := fromTextNodeID(pbNode.InsPrevId)
 		if insPrevID != nil {
-			insPrevNode := rgaTreeSplit.FindTextNode(insPrevID)
+			insPrevNode := rgaTreeSplit.FindNode(insPrevID)
 			if insPrevNode == nil {
 				log.Logger.Warn("insPrevNode should be presence")
 			}
@@ -120,10 +120,10 @@ func fromJSONText(pbText *api.JSONElement_Text) *json.Text {
 	return text
 }
 
-func fromTextNode(pbTextNode *api.TextNode) *json.TextNode {
-	textNode := json.NewTextNode(
+func fromTextNode(pbTextNode *api.TextNode) *json.RGATreeSplitNode {
+	textNode := json.NewRGATreeSplitNode(
 		fromTextNodeID(pbTextNode.Id),
-		pbTextNode.Value,
+		json.NewTextValue(pbTextNode.Value),
 	)
 	if pbTextNode.RemovedAt != nil {
 		textNode.Remove(fromTimeTicket(pbTextNode.RemovedAt), time.MaxTicket)
@@ -131,12 +131,12 @@ func fromTextNode(pbTextNode *api.TextNode) *json.TextNode {
 	return textNode
 }
 
-func fromTextNodeID(pbTextNodeID *api.TextNodeID) *json.TextNodeID {
+func fromTextNodeID(pbTextNodeID *api.TextNodeID) *json.RGATreeSplitNodeID {
 	if pbTextNodeID == nil {
 		return nil
 	}
 
-	return json.NewTextNodeID(
+	return json.NewRGATreeSplitNodeID(
 		fromTimeTicket(pbTextNodeID.CreatedAt),
 		int(pbTextNodeID.Offset),
 	)

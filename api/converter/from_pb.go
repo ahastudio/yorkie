@@ -168,9 +168,9 @@ func fromCreatedAtMapByActor(
 	return createdAtMapByActor
 }
 
-func fromTextNodePos(pbPos *api.TextNodePos) *json.TextNodePos {
-	return json.NewTextNodePos(
-		json.NewTextNodeID(fromTimeTicket(pbPos.CreatedAt), int(pbPos.Offset)),
+func fromTextNodePos(pbPos *api.TextNodePos) *json.RGATreeSplitNodePos {
+	return json.NewRGATreeSplitNodePos(
+		json.NewRGATreeSplitNodeID(fromTimeTicket(pbPos.CreatedAt), int(pbPos.Offset)),
 		int(pbPos.RelativeOffset),
 	)
 }
@@ -191,7 +191,7 @@ func fromElement(pbElement *api.JSONElementSimple) json.Element {
 	switch pbType := pbElement.Type; pbType {
 	case api.ValueType_JSON_OBJECT:
 		return json.NewObject(
-			json.NewRHT(),
+			json.NewRHTPriorityQueueMap(),
 			fromTimeTicket(pbElement.CreatedAt),
 		)
 	case api.ValueType_JSON_ARRAY:
@@ -218,7 +218,7 @@ func fromElement(pbElement *api.JSONElementSimple) json.Element {
 		)
 	case api.ValueType_TEXT:
 		return json.NewText(
-			json.NewRGATreeSplit(),
+			json.NewRGATreeSplit(json.InitialTextNode()),
 			fromTimeTicket(pbElement.CreatedAt),
 		)
 	}

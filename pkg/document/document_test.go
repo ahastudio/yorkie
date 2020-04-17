@@ -211,6 +211,68 @@ func TestDocument(t *testing.T) {
 		assert.Equal(t, `{"k1":"하늘"}`, doc.Marshal())
 	})
 
+	t.Run("rich text test", func(t *testing.T) {
+		doc := document.New("c1", "d1")
+
+		err := doc.Update(func(root *proxy.ObjectProxy) error {
+			text := root.SetNewRichText("k1")
+			text.Edit(0, 0, "Hello world")
+			assert.Equal(
+				t,
+				`[0:0:00:0 {} ""][1:2:00:0 {} "Hello world"]`,
+				text.AnnotatedString(),
+			)
+			return nil
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, `{"k1":"Hello world"}`, doc.Marshal())
+
+		err = doc.Update(func(root *proxy.ObjectProxy) error {
+			text := root.GetRichText("k1")
+			text.SetStyle(0, 5, "bold", "true")
+			assert.Equal(t,
+				`[0:0:00:0 {} ""][1:2:00:0 {"bold":"true"} "Hello"][1:2:00:5 {} " world"]`,
+				text.AnnotatedString(),
+			)
+			return nil
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, `{"k1":"Hello world"}`, doc.Marshal())
+
+		err = doc.Update(func(root *proxy.ObjectProxy) error {
+			text := root.GetRichText("k1")
+			text.SetStyle(0, 5, "bold", "true")
+			assert.Equal(
+				t,
+				`[0:0:00:0 {} ""][1:2:00:0 {"bold":"true"} "Hello"][1:2:00:5 {} " world"]`,
+				text.AnnotatedString(),
+			)
+
+			text.SetStyle(3, 5, "italic", "true")
+			assert.Equal(
+				t,
+				`[0:0:00:0 {} ""][1:2:00:0 {"bold":"true"} "Hel"][1:2:00:3 {"bold":"true","italic":"true"} "lo"][1:2:00:5 {} " world"]`,
+				text.AnnotatedString(),
+			)
+			return nil
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, `{"k1":"Hello world"}`, doc.Marshal())
+
+		err = doc.Update(func(root *proxy.ObjectProxy) error {
+			text := root.GetRichText("k1")
+			text.Edit(5, 11, " Yorkie")
+			assert.Equal(
+				t,
+				`[0:0:00:0 {} ""][1:2:00:0 {"bold":"true"} "Hel"][1:2:00:3 {"bold":"true","italic":"true"} "lo"][4:1:00:0 {} " Yorkie"]{1:2:00:5 {} " world"}`,
+				text.AnnotatedString(),
+			)
+			return nil
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, `{"k1":"Hello Yorkie"}`, doc.Marshal())
+	})
+
 	t.Run("rollback test", func(t *testing.T) {
 		doc := document.New("c1", "d1")
 

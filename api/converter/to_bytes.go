@@ -88,7 +88,7 @@ func toPrimitive(primitive *json.Primitive) *api.JSONElement {
 func toText(text *json.Text) *api.JSONElement {
 	return &api.JSONElement{
 		Body: &api.JSONElement_Text_{Text: &api.JSONElement_Text{
-			Nodes:     toTextNodes(text.TextNodes()),
+			Nodes:     toTextNodes(text.Nodes()),
 			CreatedAt: toTimeTicket(text.CreatedAt()),
 			UpdatedAt: toTimeTicket(text.UpdatedAt()),
 			RemovedAt: toTimeTicket(text.RemovedAt()),
@@ -96,7 +96,7 @@ func toText(text *json.Text) *api.JSONElement {
 	}
 }
 
-func toRHTNodes(rhtNodes []*json.RHTNode) []*api.RHTNode {
+func toRHTNodes(rhtNodes []*json.RHTPQMapNode) []*api.RHTNode {
 	var pbRHTNodes []*api.RHTNode
 	for _, rhtNode := range rhtNodes {
 		pbRHTNodes = append(pbRHTNodes, &api.RHTNode{
@@ -117,7 +117,7 @@ func toRGANodes(rgaNodes []*json.RGATreeListNode) []*api.RGANode {
 	return pbRGANodes
 }
 
-func toTextNodes(textNodes []*json.TextNode) []*api.TextNode {
+func toTextNodes(textNodes []*json.RGATreeSplitNode) []*api.TextNode {
 	var pbTextNodes []*api.TextNode
 	for _, textNode := range textNodes {
 		pbTextNode := &api.TextNode{
@@ -135,7 +135,7 @@ func toTextNodes(textNodes []*json.TextNode) []*api.TextNode {
 	return pbTextNodes
 }
 
-func toTextNodeID(id *json.TextNodeID) *api.TextNodeID {
+func toTextNodeID(id *json.RGATreeSplitNodeID) *api.TextNodeID {
 	return &api.TextNodeID{
 		CreatedAt: toTimeTicket(id.CreatedAt()),
 		Offset:    int32(id.Offset()),
